@@ -1,0 +1,46 @@
+<?php
+function mytableinterface_install() {
+
+}
+
+function mytableinterface_uninstall() {
+
+}
+
+
+function mytableinterface_schema() {
+  $schema['mytableinterface_table'] = array(
+    'description' => t('Text messages table'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique identifier'),
+        'type' => 'serial',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'uid' => array(
+        'description' => t('User identifier'),
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'type' => array(
+        'description' => t('Type of the message'),
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'title' => array(
+        'description' => t('Message title'),
+        'type' => 'varchar',
+        'not null' => true,
+        'length'  => 40,
+      ),
+      'body' => array(
+        'description' => t('Message body'),
+        'type' => 'text',
+        'not null' => true,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

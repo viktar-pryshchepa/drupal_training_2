@@ -1,0 +1,8 @@
+name = "My Table interface"
+description = "Implements interface to work with table"
+package = My
+core = 7.x
+files[] = mytableinterface.module
+files[] = mytableinterface.install
+dependencies[] = entity
+project = mytableinterface

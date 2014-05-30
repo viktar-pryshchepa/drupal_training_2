@@ -1,0 +1,324 @@
+<?php
+/**
+ * @file mytableinterface.module
+ */
+/**
+* Implements hook_menu.
+*/
+function mytableinterface_menu() {
+  $menu['training/mytableinterface'] = array(
+    'title' => t('Messages'),
+    'page callback' => 'mytableinterface_landing_page',
+    'menu_name' => 'navigation',
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => 'mytableinterface_everyone_access',
+  );
+  $menu['training/mytableinterface/add'] = array(
+    'title' => t('Add message'),
+    'page callback' => 'mytableinterface_add_page',
+    'type' => MENU_CALLBACK,
+    'access callback' => 'mytableinterface_everyone_access',
+  );
+  $menu['training/mytableinterface/edit/%'] = array(
+    'title' => t('Edit message'),
+    'page callback' => 'mytableinterface_edit_page',
+    'page arguments' => array(3, ),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'mytableinterface_everyone_access',
+  );
+  return $menu;
+}
+/**
+ * Implements hook_entity_info. Entity to work with a table mytableinterface_table
+ * @return array
+ */
+function mytableinterface_entity_info() {
+  $return = array(
+    'mytableinterface_message' => array(
+      'label' => t('Messages Table'),
+      'controller class' => 'EntityAPIController',
+      'base table' => 'mytableinterface_table',
+      //'uri callback' => 'entity_class_uri',
+      'fieldable' => FALSE,
+      'entity keys' => array(
+        'id' => 'id',
+      ),
+      'bundle keys' => array(),
+      'bundles' => array(),
+      'view modes' => array(),
+      'access callback' => TRUE,
+      'module' => 'mytableinterface',
+    ),
+  );
+  return $return;
+}
+/**
+ * Implements hook_form. Create form to add messages.
+*/
+function mytableinterface_add_form($form, &$form_state) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#required' => TRUE,
+    '#description' => t('Title length should be less than 40 chars.'),
+  );
+  $form['body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message body'),
+    '#required' => TRUE,
+  );
+  $form['type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Type'),
+    '#required' => TRUE,
+    '#description' => t('Type should be an integer.'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  $form['submit']['#validate'][] = 'mytableinterface_form_title_length_and_type_validate';
+  return $form;
+}
+
+/**
+ * Forms validate function
+ * @param $form
+ * @param $form_state
+ * @return bool
+ */
+function mytableinterface_form_title_length_and_type_validate($form, &$form_state) {
+  //die(kpr($form));
+  $rc = TRUE;
+  $title = $form_state['values']['title'];
+  if(strlen($title) > 40){
+    form_set_error('title', t('Title length is too long'));
+    $rc = FALSE;
+  }
+  if(!is_numeric($form_state['values']['type'])) {
+    form_set_error('type', t('Type should be an integer'));
+    $rc = FALSE;
+  }
+  return $rc;
+}
+/**
+ * Implements hook_form. Edit form.
+ * @param $form
+ * @param $form_state
+ * @param $id
+ * @return mixed
+ */
+function mytableinterface_edit_form($form, &$form_state, $id) {
+  $entity = entity_load_single('mytableinterface_message', $id);
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#required' => TRUE,
+    '#default_value' => $entity->title,
+    '#description' => t('Title length should be less than 40 chars.'),
+  );
+  $form['body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message body'),
+    '#required' => TRUE,
+    '#default_value' => $entity->body,
+  );
+  $form['type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Type'),
+    '#required' => TRUE,
+    '#default_value' => $entity->type,
+    '#description' => t('Type should be an integer.'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  $form_state['entity'] = $entity;
+  $form['submit']['#validate'][] = 'mytableinterface_form_title_length_and_type_validate';
+  return $form;
+}
+/**
+ * Implements hook_form_submit. Submit function for Edit form.
+ * @param $form
+ * @param $form_state
+ */
+function mytableinterface_edit_form_submit($form, &$form_state) {
+  $entity = $form_state['entity'];
+  if($entity) {
+    $entity->title = $form_state['values']['title'];
+    $entity->type = $form_state['values']['type'];
+    $entity->body = $form_state['values']['body'];
+    entity_save('mytableinterface_message', $entity);
+    drupal_set_message(t('Message was updated.'), 'status');
+  }
+  else {
+    drupal_set_message(t('Nothing changed. Please try again.'),'error');
+  }
+  $form_state['redirect'] = 'training/mytableinterface';
+}
+/**
+ * Implements hook_form_submit. Submit function for Add form.
+ * @param $form
+ * @param $form_state
+ */
+function mytableinterface_add_form_submit($form, &$form_state) {
+  global $user;
+  $values = array(
+    'uid' => $user->uid,
+    'type' => $form_state['values']['type'],
+    'title' => $form_state['values']['title'],
+    'body' => $form_state['values']['body'],
+  );
+  $entity = entity_create('mytableinterface_message',$values);
+  entity_save('mytableinterface_message', $entity);
+  drupal_set_message(t('New message has been created!'), 'status');
+  $form_state['redirect'] = array('training/mytableinterface');
+}
+/**
+ * Implements page to list all messages.
+ * @return string
+ */
+function mytableinterface_landing_page() {
+  $return = 'hello';
+  $header = array(
+    array(
+      'data' => 'Id',
+      'field' => 'id',
+      'sort' => 'asc'),
+    array(
+      'data' => 'User',
+      'field' => 'uid'
+    ),
+    array(
+      'data' => 'Type',
+      'field' => 'type'
+    ),
+    array(
+      'data' => 'Title',
+      'field' => 'title'
+    ),
+    array(
+      'data' => 'Body',
+      'field' => 'body'
+    ),
+  );
+  $limit = variable_get('mytableinterface_query_limit', 5);
+  $query = db_select('mytableinterface_table', 'tbl')
+    -> fields('tbl')
+    -> extend('PagerDefault')
+    -> limit($limit)
+    -> extend('TableSort')
+    -> orderByHeader($header);
+  $results = $query->execute();
+  $rows = array();
+  while($result = $results->fetchAssoc()) {
+    $rows[] = array(
+      'data' => array(
+      $result['id'], $result['uid'], $result['type'], $result['title'], $result['body'], l(t('Edit'),'training/mytableinterface/edit/' . $result['id']),
+      ),
+    );
+  }
+  $vars = array(
+    'header' => $header,
+    'rows' => $rows,
+    'colgroups' => null,
+    'sticky' => null,
+    'empty' => null,
+    'caption' => t('All messages table'),
+  );
+  $output = theme('table', $vars);
+  $link = array(
+    '#theme' => 'link',
+    '#text' => t('Add new message'),
+    '#path' => 'training/mytableinterface/add',
+    '#options' => array(
+      'attributes' => array(),
+     'html' => TRUE,
+    ),
+  );
+  //$add_link['content'] = l(t('Add new message'), 'training/mytableinterface/add');
+  return $output . theme('pager') . theme('link', $link);
+}
+/**
+ * Implements page callback for editing message.
+ * @param $id
+ * @return array|mixed
+ */
+function mytableinterface_edit_page($id) {
+  $return = drupal_get_form('mytableinterface_edit_form', $id);
+  return $return;
+}
+/**
+ * Implements page callback for adding message.
+ * @return array|mixed
+ */
+function mytableinterface_add_page() {
+  $return = drupal_get_form('mytableinterface_add_form');
+  return $return;
+}
+/**
+ * Implements access function.
+ * @return bool
+ */
+function mytableinterface_everyone_access() {
+  return TRUE;
+}
+/**
+ * Implements hook_node_grants
+ * @param $account
+ * @param $op
+ * @return mixed
+ */
+function mytableinterface_node_grants($account, $op) {
+  global $user;
+  $messages = db_select('mytableinterface_table', 'tbl')
+    ->fields('tbl', array('uid'))
+    ->condition('uid', $account->uid)
+    ->execute()->fetchAllAssoc('uid', PDO::FETCH_ASSOC);
+  if(count($messages) > 0) {
+    $grants['mytableinterface'] = array(1);
+  }
+  else{
+    $grants['mytableinterface_other'] = array(888);
+  }
+  return $grants;
+}
+/**
+ * Implements hook_node_access_records
+ * @param $node
+ * @return array
+ */
+function mytableinterface_node_access_records($node) {
+  if ($node->type == 'article') {
+    $grants = array();
+    $grants[] = array(
+      'realm' => 'mytableinterface',
+      'gid' => array(1),
+      'grant_view' => 1,
+      'grant_update' => 1,
+      'grant_delete' => 1,
+      'priority' => 0,
+    );
+    $grants[] = array(
+      'realm' => 'mytableinterface_other',
+      'gid' => array(888),
+      'grant_view' => 0,
+      'grant_update' => 0,
+      'grant_delete' => 0,
+      'priority' => 0,
+    );
+    return $grants;
+  }
+  return array();
+}
+/*
+function mytableinterface_permission() {
+  return array(
+    'mytableinterface' => array(
+      'title' => t('My Table interface node permission'),
+      'description' => t('My Table interface node permission.'),
+    ),
+  );
+}
+*/
