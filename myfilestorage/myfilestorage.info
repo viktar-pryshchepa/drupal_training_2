@@ -1,0 +1,7 @@
+name = "My Filestorage"
+description = "Implements filestorage"
+package = My
+core = 7.x
+files[] = myfilestorage.module
+dependencies[] = ctools
+project = myfilestorage

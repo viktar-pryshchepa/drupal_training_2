@@ -1,0 +1,174 @@
+<?php
+/**
+ * Implements hook_menu
+ */
+function myfilestorage_menu() {
+  $menu['training/filestorage'] = array(
+    'title' => t('Filestorage'),
+    'page callback' => 'myfilestorage_landing_page',
+    'menu_name' => 'navigation',
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => 'myfilestorage_everyone_access',
+  );
+  $menu['training/filestorage/download/%file'] = array(
+    'page callback' => 'myfilestorage_download_page',
+    'access callback' => 'myfilestorage_everyone_access',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+  );
+  $menu['training/filestorage/upload/%ctools_js'] = array(
+    'title' => t('File upload'),
+    'access callback' => 'myfilestorage_file_upload_access',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'page callback' => 'myfilestorage_upload_page',
+  );
+  return $menu;
+}
+
+/**
+ * Implements download page callback
+ * @param $file
+ */
+function myfilestorage_download_page($file) {
+  global $user;
+  if($user->uid === 0) {
+    return drupal_access_denied();
+  }
+  $files = db_select('file_managed', 'f')
+    ->fields('f', array('fid'))
+    ->condition('uid', $user->uid)
+    ->execute()->fetchAllAssoc('fid', PDO::FETCH_ASSOC);
+  if(count($files) === 0) {
+    return drupal_access_denied();
+  }
+  if(isset($file)) {
+    file_transfer($file->uri, array(
+        'Content-disposition' => 'attachment; filename=' . $file->filename,
+        'Content-Type' => 'application/octet-stream',
+        'Content-Length' => filesize($file->uri),
+      )
+    );
+  } else {
+    return drupal_access_denied();
+  }
+}
+/**
+ * Implements main filestorage page callback
+ * @return string
+ */
+function myfilestorage_landing_page() {
+  global $user;
+  drupal_add_css(drupal_get_path('module', 'myfilestorage') . '/myfilestorage.css', array(
+      'type' => 'file',
+      'group' => CSS_DEFAULT,
+      'every_page' => TRUE,
+    )
+  );
+  drupal_add_js(array('uid' => $user->uid, ), 'setting');
+  drupal_add_js('jQuery(document).ready(function () {
+      var uid = Drupal.settings.uid;
+      jQuery(".user-row-" + uid).css("background-color", "#E2FFE2");
+    });', 'inline');
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+  $html = '';
+  $html .= ctools_modal_text_button(t('Upload file'), 'training/filestorage/upload/ajax', t('Upload file dialog'));
+  $results = db_select('file_managed', 'fm')->fields('fm')->extend('PagerDefault')->limit(10)->execute();
+  $rows = array();
+  $header = array('fid', array('data' => 'uid', 'class' => 'myfilestorage-hidden'), 'status', 'uri', 'link');
+  foreach ($results as $row) {
+    $rows[] = array(
+      'data' => array(
+        $row->fid,
+        array('data' => $row->uid, 'class' => 'myfilestorage-hidden'),
+        $row->status,
+        $row->uri,
+        l($row->filename, 'training/filestorage/download/' . $row->fid),
+      ),
+      'class' => array('user-row-' . $row->uid)
+    );
+  }
+  $vars = array('header' => $header, 'rows' => $rows);
+  $table = theme('table', $vars).theme('pager');
+  $html .= $table;
+  return $html;
+}
+/**
+ * Implements hook_form
+ * @param $form
+ * @param $form_state
+ * @return mixed
+ */
+function myfilestorage_upload_form($form, &$form_state) {
+  $form_state['ajax'] = TRUE;
+  $form['file'] = array (
+    '#title' => t('Upload file'),
+    '#type' => 'managed_file',
+    '#upload_location' => 'public://files',
+  );
+  $form['#attributes'] = array('enctype' => "multipart/form-data");
+  $form['submit'] = array (
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+/**
+ * Implements upload page callback
+ * @param $js
+ * @return array|mixed
+ */
+function myfilestorage_upload_page($js) {
+  if (!$js) {
+    $form = drupal_get_form('myfilestorage_upload_form', FALSE);
+    return $form;
+  }
+  ctools_include('modal');
+  ctools_include('ajax');
+  $form_state = array(
+    'title' => t('Upload'),
+    'ajax' => TRUE,
+  );
+  $output = ctools_modal_form_wrapper('myfilestorage_upload_form', $form_state);
+  if (!empty($form_state['executed'])) {
+    drupal_set_message(t('Upload complete.'), 'status');
+    $comm = array(ctools_ajax_command_redirect('training/filestorage'),);
+    print ajax_render($comm);
+    exit;
+  }
+  print (ajax_render($output));
+  exit;
+}
+
+/**
+ * Implements submit action
+ * @param $form
+ * @param $form_state
+ */
+function myfilestorage_upload_form_submit(&$form, &$form_state)
+{
+  $fid = $form_state['values']['file'];
+  if($fid) {
+    $file = file_load($fid);
+    $file->status = FILE_STATUS_PERMANENT;
+    file_save($file);
+  }
+  $form_state['redirect'] = 'training/filestorage';
+}
+/**
+ * Access callbacks
+ */
+function myfilestorage_file_upload_access() {
+  global $user;
+  if($user->uid > 0) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+function myfilestorage_everyone_access() {
+  return TRUE;
+}
