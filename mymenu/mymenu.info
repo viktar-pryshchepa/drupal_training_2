@@ -1,0 +1,7 @@
+name = "My hook menu"
+description = "Task 1 hook menu"
+package = My
+core = 7.x
+files[] = mymenu.module
+;dependencies[] =
+project = mymenu

@@ -1,0 +1,390 @@
+<?php
+/**
+ * @file mymeny.module
+ */
+  function mymenu_menu() {
+    $menu['training/menu'] = array(
+      'title' => t('Menu landing page'),
+      'page callback' => 'landing_page',
+      'menu_name' => 'navigation',
+      'expanded' => TRUE,
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/menu/custom_access'] = array(
+      'title' => t('Custom Access Menu Item'),
+      'page callback' => 'custom_access_page',
+      'menu_name' => 'navigation',
+      'type' => MENU_NORMAL_ITEM,
+      'access arguments' => array('authenticated user'),
+    );
+    $menu['training/menu/permissioned'] = array(
+      'title' => t('Permissioned Menu Item'),
+      'page callback' => 'permissioned_access_page',
+      'menu_name' => 'navigation',
+      'type' => MENU_NORMAL_ITEM,
+      'access arguments' => array('access protected menu example'),
+    );
+    $menu['training/menu/callback'] = array(
+      'title' => t('Callback Menu Page'),
+      'page callback' => 'menu_callback_page',
+      'type' => MENU_CALLBACK,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/menu/tabs'] = array(
+      'title' => t('Tabs'),
+      'menu_name' => 'navigation',
+      'page callback' => 'tabs_page',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    $menu['training/menu/tabs/first'] = array(
+      'title' => t('Tab first'),
+      'page arguments' => array(3),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/menu/tabs/second'] = array(
+      'title' => t('Tab second'),
+      'page arguments' => array(3),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'everyone_access',
+      'weight' => -9,
+    );
+    $menu['training/menu/tabs/third'] = array(
+      'title' => t('Tab third'),
+      'page arguments' => array(3),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'everyone_access',
+      'weight' => -8,
+    );
+    $menu['training/menu/tabs/fourth'] = array(
+      'title' => t('Tab fourth'),
+      'page arguments' => array(3),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'everyone_access',
+      'weight' => -7,
+    );
+    //task 7
+    $menu['training/menu/tabs/first/first'] = array(
+      'title' => t('Tab first/first'),
+      'page arguments' => array(4),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/menu/tabs/first/second'] = array(
+      'title' => t('Tab first/second'),
+      'page arguments' => array(4),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'everyone_access',
+      'weight' => -9,
+    );
+    $menu['training/menu/tabs/first/third'] = array(
+      'title' => t('Tab first/third'),
+      'page arguments' => array(4),
+      'page callback' => 'tabs_callback_page',
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'everyone_access',
+      'weight' => -8,
+    );
+    //Task 8
+    $menu['training/menu/arguments'] = array(
+      'title' => t('Arguments'),
+      'menu_name' => 'navigation',
+      'page arguments' => array(3, 4),
+      'page callback' => 'arguments_callback_page',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    $menu['training/menu/arguments/%/%'] = array(
+      'title' => t('Arguments'),
+      'menu_name' => 'navigation',
+      'page arguments' => array(3, 4),
+      'page callback' => 'arguments_callback_page',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    //Task 9
+    $menu['training/menu/placeholder/%/display'] = array(
+      'title' => t('Placeholder'),
+      'menu_name' => 'navigation',
+      'page arguments' => array(3),
+      'page callback' => 'placeholder_callback_page',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    //Task 10
+    $menu['training/menu/default_arg/%'] = array(
+      'title' => t('Default argument'),
+      'menu_name' => 'navigation',
+      'page arguments' => array(3),
+      'page callback' => 'default_arg_callback_page',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    //Task 11
+    $menu['training/menu/title'] = array(
+      'title callback' => 'dynamic_title_callback',
+      'menu_name' => 'navigation',
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    //Task 12
+    $menu['training/menu/main'] = array(
+      'title' => t('Item in main menu'),
+      'menu_name' => 'main-menu',
+      'access callback' => 'everyone_access',
+      'type' => MENU_NORMAL_ITEM,
+    );
+    $menu['training/theme'] = array(
+      'title' => t('Theme landing page'),
+      'page callback' => 'links_theme_page',
+      'menu_name' => 'navigation',
+      'expanded' => TRUE,
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/theme/table'] = array(
+      'title' => t('Table theme page'),
+      'page callback' => 'table_theme_page',
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/theme/image'] = array(
+      'title' => t('Image theme page'),
+      'page callback' => 'image_theme_page',
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    $menu['training/theme/access'] = array(
+      'title' => t('Access theme page'),
+      'page callback' => 'access_theme_page',
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'everyone_access',
+    );
+    return $menu;
+  }
+
+/**
+ * Every one can access callback
+ */
+function everyone_access() {
+  return TRUE;
+}
+/**
+   * Menu permissions callback
+   */
+  function mymenu_permission() {
+    $permissions = array(
+      'access protected menu example' => array(
+        'title' => t('Access protected menu example'),
+        'description' => t('Only users with access protected menu permission'),
+      ),
+    );
+    return $permissions;
+  }
+  /**
+   * Menu callback of callback page
+   */
+  function menu_callback_page() {
+    return t('The menu entry for this page is of type MENU_CALLBACK');
+  }
+  /**
+   * Menu callback of landing page
+   */
+  function landing_page() {
+    return t('This is the landing page of the Training module');
+  }
+  /**
+   * Menu callback of custom access page
+   */
+  function custom_access_page() {
+    return t('This is the Custom access page of the Training module');
+  }
+  /**
+   * Menu callback of permissioned access page
+   */
+  function permissioned_access_page() {
+    return t('This is the Permissioned access page of the Training module');
+  }
+
+  /**
+   * Menu callback of Tabs page
+   */
+  function tabs_page() {
+    return t('This is the "tabs" menu entry');
+  }
+  /**
+   * Tabs callback page (task6)
+   */
+  function tabs_callback_page($arg) {
+    /*
+    if(isset($args[3]) && isset($args[4])) {
+      return 'This is the tab "'. $args[3]. '/' .$args[4] .'" in the "basic tabs" example';
+    }*/
+    return t('This is the tab "' . $arg . '" in the "basic tabs" example');
+  }
+  /**
+   * Arguments menu item callback(Task8)
+  */
+  function arguments_callback_page($arg1='', $arg2='') {
+    return t('Argument 1=' . $arg1 . '<br> Argument 2=' . $arg2);
+  }
+  /**
+   * Placeholder callback page (Task 9)
+   */
+
+  function placeholder_callback_page($arg) {
+    return '<div>' . t($arg) . '</div>';
+  }
+  /**
+   * Default argument callback page (Task 10)
+   */
+  function default_arg_callback_page($arg) {
+
+    $tmp = '';
+    switch ($arg) {
+      case 1 : $tmp = 'one'; break;
+      case 2 : $tmp = 'two'; break;
+      case 3 : $tmp = 'three'; break;
+      case 99 : $tmp = 'Almost there'; break;
+      default : $tmp = '404'; break;
+    }
+  if ($tmp === '404') {
+    drupal_not_found();
+    drupal_exit();
+  }
+    return t('Argument: ' . $tmp);
+  }
+  /**
+   * Dynamic title callback function (Task 11)
+   */
+  function dynamic_title_callback() {
+    global $user;
+    (!$user->uid)?$username = 'anonymous':$username = $user->name;
+    return t('Dynamic title: username= ' . $username);
+  }
+/**
+ * THEME callback page
+ */
+
+function links_theme_page() {
+  //$result = '';
+  $items = array(
+    l(t('List'), 'training/theme/list'),
+    l(t('Table'), 'training/theme/table'),
+    l(t('Image'), 'training/theme/image'),
+    l(t('Access'), 'training/theme/access'),
+  );
+  $vars = array(
+    'items' => $items,
+    'title' => t('Links to themes'),
+    'type' => 'ol',
+    'attributes' => array(),
+  );
+  $result = theme('item_list', $vars);
+  return $result;
+}
+/**
+ * Table theme page callback
+ */
+function table_theme_page() {
+  $result = '';
+  $header = array(
+    'data' => array(
+      t('header 1'),
+      t('header 2'),
+      t('header 3'),
+    ),
+  );
+  $rows = array(
+    array(
+      'data' => array(
+        t('cell 1'),
+        array('data' => t('cell 2'), 'colspan' => '2'),
+      ),
+      'class' => array('rowClass'),
+    ),// row 1
+    array(
+      'data' => array(
+        t('cell 2-1'),
+        array('data' => t('cell 2'), 'colspan' => '2-2'),
+      ),
+      'class' => array('rowClass'),
+    ),// row 2
+    array(
+      'data' => array(
+        t('cell 3-1'),
+        array('data' => t('cell 3-2'), 'colspan' => '2'),
+      ),
+      'class' => array('rowClass'),
+    ),// row 3
+    array(
+      'data' => array(
+        t('cell 4-1'),
+        array('data' => t('cell 4-2'), 'colspan' => '2'),
+      ),
+      'class' => array('rowClass'),
+    ),// row 4
+  );
+  $vars = array(
+    'header' => $header['data'],
+    'rows' => $rows,
+    'attributes' => array('id' => 'table-test'),
+    'caption' => t('Theme table sample'),
+    'colgroups' => array(),
+    'sticky' => FALSE,
+    'empty' => array(),
+  );
+  $result = theme('table', $vars);
+  return $result;
+}
+/**
+ * Image theme page callback
+ */
+function image_theme_page() {
+  $result = '';
+  $styles = array();
+
+  foreach (image_styles() as $style) {
+    $styles['names'][] = $style['name'];
+    $styles['labels'][] = $style['label'];
+  }
+  $vars = array(
+    'style_name' => '',
+    'path' => 'modules/image/sample.png',
+    'title' => t('Image'),
+    'attributes' => array('class' => array('simple-image'), ),
+  );
+  $items = array();
+  foreach ($styles['labels'] as $style) {
+    $items[] = $style;
+  }
+  $vars_list = array(
+    'items' => $items,
+    'title' => t('Image styles'),
+    'type' => 'ol',
+    'attributes' => array(),
+  );
+  foreach ($styles['names'] as $style) {
+    $vars['style_name'] = $style;
+    $result .= theme('image_style', $vars);
+    $result .= '<br>' ;
+  }
+  $result .= '<br>' . theme('item_list', $vars_list);
+  return $result;
+}
+function access_theme_page() {
+  $result = '';
+  $result = (user_access('access protected content')) ? t('Custom access for rendered content') : t('Custom access inversed for rendered content');
+  return $result;
+}
+
