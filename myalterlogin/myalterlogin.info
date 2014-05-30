@@ -1,0 +1,6 @@
+name = "My alter login form"
+description = "add secret login key"
+package = My
+core = 7.x
+files[] = myalterlogin.module
+project = myalterlogin

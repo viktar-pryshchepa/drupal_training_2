@@ -1,0 +1,7 @@
+name = "Currency Block"
+description = "This block can show currency exchange rates"
+package = My
+core = 7.x
+files[] = mycurrency.module
+;dependencies[] =
+project = mycurrency
