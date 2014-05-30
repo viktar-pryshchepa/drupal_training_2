@@ -1,0 +1,48 @@
+<?php
+function mybatch_install() {
+}
+function mybatch_uninstall() {
+}
+function mybatch_schema() {
+  $schema['mybatch_table'] = array(
+    'description' => t('Table for storing currencies'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique identifier'),
+        'type' => 'serial',
+        'unsigned' => true,
+        'not null' => true,
+      ),
+      'numcode' => array(
+        'description' => t('Currency Number Code'),
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'charcode' => array(
+        'description' => t('Currency Character Code'),
+        'type' => 'varchar',
+        'length'  => 5,
+        'not null' => true,
+      ),
+      'scale' => array(
+        'description' => t('Scale O_o'),
+        'type' => 'int',
+        'not null' => true,
+      ),
+      'name' => array(
+        'description' => t('Currency name'),
+        'type' => 'varchar',
+        'not null' => true,
+        'length' => 40,
+      ),
+      'rate' => array(
+        'description' => t('Currency Number Code'),
+        'type' => 'float',
+        'not null' => true,
+        'unsigned' => true,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

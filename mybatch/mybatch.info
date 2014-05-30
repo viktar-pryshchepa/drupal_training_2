@@ -1,0 +1,9 @@
+name = "My Batch module"
+description = "Get currencies via batch api"
+package = My
+core = 7.x
+files[] = mybatch.module
+files[] = view/mybatch_table.view.inc
+dependencies[] = ctools
+dependencies[] = views
+project = mybatch
