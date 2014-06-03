@@ -1,0 +1,13 @@
+<?php
+function mytranslation_install() {
+  $file = new stdClass();
+  $file->filename = 'mytranslation.ru.po';
+  $file->filemime = file_get_mimetype($file->filename);
+  $file->filepath = drupal_get_path('module', 'mytranslation') . '/translations/mytranslation.ru.po';
+  $file->uri = drupal_realpath(drupal_get_path('module', 'mytranslation') . '/translations/mytranslation.ru.po');
+  _locale_import_po($file, 'ru', LOCALE_IMPORT_OVERWRITE, 'default');
+}
+
+function mytranslation_uninstall() {
+
+}

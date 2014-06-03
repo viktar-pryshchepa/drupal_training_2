@@ -1,0 +1,140 @@
+<?php
+/**
+ * @file mytranslation.module
+ */
+function mytranslation_menu() {
+  $item['training/translation'] = array(
+    'title' => t('Translation'),
+    'menu_name' => 'navigation',
+    'page callback' => 'mytranslation_page_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $item['training/date'] = array(
+    'title' => t('Date'),
+    'menu_name' => 'navigation',
+    'page callback' => 'mytranslation_date_page_callback',
+    'access arguments' => array('authorized access'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $item['training/security'] = array(
+    'title' => t('Security'),
+    'menu_name' => 'navigation',
+    'page callback' => 'mytranslation_security_page_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $item['training/date/%ctools_js'] = array(
+    'title' => t('Date'),
+    'page arguments' => array(2,),
+    'page callback' => 'mytranslation_date_c_tool_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $item;
+}
+
+/**
+ * Implements translation page callback.
+ * @return null|string
+ */
+function mytranslation_page_callback() {
+  $tasks = format_plural(rand(1,100), '1 task', '@count tasks');
+  return $tasks;
+}
+
+/**
+ * Implements date page callback.
+ * @return string
+ */
+function mytranslation_date_page_callback() {
+  global $user;
+  $date = t('Please, !login or !register your account.', array(
+    '!register' => l('register', 'user/register'),
+    '!login' => l('log in', 'user'),
+  ));
+  if($user->uid > 0) {
+    //two variants
+    $created = $user->created;
+    $date = format_date($created, 'custom','d M Y');
+    $newyear = format_date(REQUEST_TIME, 'custom','Y');
+    $newyear++;
+    $newyear = strtotime('01-01-'. $newyear);
+    $diff = $newyear - time();
+    $days = floor($diff/86400);
+    // 2 ==========================
+    $date_obj = date_now();
+    $current_year = $date_obj->format('Y');
+    $newyear_object = new DateObject('1-jan-'.++$current_year);
+    $diff = $newyear_object->difference($date_obj, 'days', TRUE);
+    drupal_add_js(array('user_create_date' => $date, 'days_to_new_year' => $days,), 'setting');
+    drupal_add_js('jQuery(document).ready(function () {
+      jQuery(".alert-date-link").click(function () {
+        var user_create_date = Drupal.settings.user_create_date;
+        var days_to_new_year = Drupal.settings.days_to_new_year;
+        alert(Drupal.t("User created on: ") + user_create_date + "\n" + Drupal.t("Days to new year: ") + days_to_new_year);
+       return false;
+     });});', 'inline');
+    l(t('Link text'), 'about-us', array('attributes' => array('class' => 'about-link')));
+  }
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+  drupal_add_js(array(
+    'my-modal-style' => array(
+      'modalSize' => array(
+        'type' => 'fixed',
+        'width' => 250,
+        'height' => 250,
+      ),
+      'closeText' => 'Close',
+    ),
+  ), 'setting');
+  $return = $date . '<br>'. ctools_modal_text_button('Js','training/date/nojs','c-tool-modal-my-modal-style') .'<br>'. l(t('Days to new year simple alert'), '#', array('attributes' => array('class' => 'alert-date-link')));
+  return $return;
+}
+/**
+ * Implements security form.
+ * @param $form
+ * @param $form_state
+ * @return mixed
+ */
+function mytranslation_security_form($form, &$form_state) {
+  $form['area'] = array(
+    '#title' => t('Input text'),
+    '#type' => 'textarea',
+    '#prefix' => "<div id='update-name-value'>",
+     '#suffix' => "</div>",
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+    '#ajax' => array(
+      'callback' => 'ajax_example_submit_callback',
+      'wrapper' => 'update-name-value',
+      'effect' => 'fade',
+    ),
+  );
+  return $form;
+}
+function ajax_example_submit_callback($form, &$form_state) {
+  $form['area']['#value'] = check_plain($form_state['values']['area']);// = //check_plain($form_state['values']['area']);
+  return $form['area'];
+}
+/**
+ * Implements security form submit.
+ * @param $form
+ * @param $form_state
+ */
+function mytranslation_security_page_callback() {
+  return drupal_get_form('mytranslation_security_form');
+}
+function mytranslation_date_c_tool_callback($js = NULL){
+  if($js){
+  ctools_include('modal');
+  ctools_include('ajax');
+  }
+  return ctools_modal_render('alert',ctools_add_js('c_tool', 'mytranslation', 'js'));
+
+}
+

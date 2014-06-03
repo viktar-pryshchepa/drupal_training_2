@@ -1,0 +1,11 @@
+name = "My Translation module"
+description = "Add plural form of word Task in russian"
+package = My
+core = 7.x
+files[] = mytranslation.module
+files[] = translations/mytranslation.ru.po
+files[] = js/c_tool.js
+dependencies[] = date
+dependencies[] = ctools
+dependencies[] = date_api
+project = mytranslation
