@@ -1,0 +1,91 @@
+<?php
+/**
+ * @file mylottery.module
+ */
+define('XMLRPC_ERROR_CODE', 1000);
+define('XMLRPC_WIN_CODE', 1);
+define('XMLRPC_LOSS_CODE', -1);
+/**
+ * Implements hook_menu().
+ * @return mixed
+ */
+function mylottery_menu() {
+  $item['training/lottery'] = array(
+    'title' => t('Lottery'),
+    'menu_name' => 'navigation',
+    'access arguments' => array('access content'),
+    //'access callback' => 'user_is_logged_in',
+    //'access callback' => TRUE,
+    'page callback' => 'mylottery_page',
+  );
+  return $item;
+}
+function mylottery_page() {
+  global $user;
+  rules_invoke_event('mylottery_check',$user);
+  if($user->uid == 0){
+    return t('Please !login to play lottery.', array('!login' => l(t('log in'), 'user')));
+  }
+  return t('Thank you for playing our lottery.');
+}
+/**
+ * Implements hook_block_info().
+ */
+function mylottery_block_info() {
+  $block = array();
+  $block['mylottery_block'] = array(
+    'info' => t('Lottery'),
+    'cache' => DRUPAL_CACHE_PER_USER,
+    'status' => 1,
+    'region' => 'sidebar_first',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => 'training/lottery',
+  );
+  return $block;
+}
+/**
+ * Implements hook_block_view().
+ */
+function mylottery_block_view($delta='') {
+  if($delta == 'mylottery_block') {
+    $block['subject'] = t('Lottery');
+    $lottery_result = cache_get('mylottery_results_cache', 'cache');
+    if(!empty($lottery_result)) {
+      $list = array();
+      $list = $lottery_result->data;
+      $vars = array(
+        'items' => $list,
+        'title' => t(''),
+        'type' => 'ol',
+        'attributes' => array(),
+      );
+      $block['content'] = theme('item_list', $vars);
+    }
+    return $block;
+  }
+}
+/**
+ * Implements XMLRPC hook.
+ * @return array
+ */
+function mylottery_xmlrpc() {
+  $methods[] = array(
+    'mylottery.check',
+    '_mylottery_check_xmlrpc',
+    array(
+      'int',
+      'int',
+    ),
+    t('Check is user a winner.'),
+  );
+  return $methods;
+}
+function _mylottery_check_xmlrpc($a) {
+  if($a < 1 || $a > 8) {
+    die();
+    return xmlrpc_error(XMLRPC_ERROR_CODE, t('Wrong argument.'));
+  }
+  $b = rand(1, 8);
+  $result = ($a == $b) ? XMLRPC_WIN_CODE : XMLRPC_LOSS_CODE;
+  return $result;
+}

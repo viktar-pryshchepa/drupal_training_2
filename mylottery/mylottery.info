@@ -1,0 +1,7 @@
+name = "My Lottery module"
+description = "Module implements lottery game"
+package = My
+core = 7.x
+files[] = mylottery.module
+dependencies[] = rules
+project = mylottery
